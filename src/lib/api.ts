@@ -29,8 +29,9 @@ class ApiClient {
     return this.request('/services');
   }
 
-  getTestimonials() {
-    return this.request('/testimonials');
+  getTestimonials(limit?: number) {
+    const endpoint = limit ? `/testimonials?limit=${limit}` : '/testimonials';
+    return this.request(endpoint);
   }
 
   getAppointments() {

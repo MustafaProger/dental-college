@@ -52,9 +52,7 @@ src/
 │   ├── ServiceCard.tsx
 │   └── TestimonialCard.tsx
 ├── lib/                # Утилиты и API
-│   ├── api.ts          # API клиент
-│   ├── mockData.ts     # Тестовые данные
-│   └── neon-simple.ts  # Клиент для Neon PostgreSQL
+│   └── api.ts          # API клиент
 ├── App.tsx             # Главный компонент
 ├── main.tsx            # Точка входа
 └── index.css           # Глобальные стили
