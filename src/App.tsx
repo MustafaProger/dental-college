@@ -5,7 +5,6 @@ import { DoctorCard } from './components/DoctorCard';
 import { ServiceCard } from './components/ServiceCard';
 import { TestimonialCard } from './components/TestimonialCard';
 import { AppointmentModal } from './components/AppointmentModal';
-import { DatabaseStatus } from './components/DatabaseStatus';
 import { apiClient, type Doctor, type Service, type Testimonial } from './lib/api';
 import { Users, Briefcase, MessageCircle } from 'lucide-react';
 
@@ -68,14 +67,6 @@ function App() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <Hero onBookAppointment={() => handleBookAppointment()} />
-      
-      {/* Database Status Component - for development/testing */}
-      <section className="py-8 bg-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Database Status</h2>
-          <DatabaseStatus />
-        </div>
-      </section>
 
       <section id="doctors" className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

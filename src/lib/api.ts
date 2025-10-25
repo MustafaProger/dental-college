@@ -1,5 +1,5 @@
 // API client for Neon PostgreSQL
-import { neonClient } from './neon';
+import { neonClient } from './neon-simple';
 import { mockData } from './mockData';
 
 class ApiClient {
@@ -95,17 +95,9 @@ class ApiClient {
     return this.request<any[]>('/doctors?is_active=true');
   }
 
-  async getDoctor(id: number) {
-    return this.request<any>(`/doctors/${id}`);
-  }
-
   // Services API
   async getServices() {
     return this.request<any[]>('/services?is_active=true');
-  }
-
-  async getService(id: number) {
-    return this.request<any>(`/services/${id}`);
   }
 
   // Testimonials API
@@ -122,18 +114,6 @@ class ApiClient {
     return this.request<any>('/appointments', {
       method: 'POST',
       body: JSON.stringify(appointment),
-    });
-  }
-
-  async getAppointments() {
-    return this.request<any[]>('/appointments');
-  }
-
-  // Testimonials API
-  async createTestimonial(testimonial: any) {
-    return this.request<any>('/testimonials', {
-      method: 'POST',
-      body: JSON.stringify(testimonial),
     });
   }
 }
