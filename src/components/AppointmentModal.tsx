@@ -87,21 +87,24 @@ export function AppointmentModal({ isOpen, onClose, selectedDoctorId }: Appointm
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900">Book an Appointment</h2>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto modal-enter shadow-2xl">
+        <div className="sticky top-0 bg-gradient-to-r from-teal-50 to-blue-50 border-b border-gray-200 px-6 py-6 flex items-center justify-between z-[9999]">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 text-shimmer">Book an Appointment</h2>
+            <p className="text-gray-600 mt-1">Fill out the form below to schedule</p>
+          </div>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
+            className="text-gray-500 hover:text-gray-700 transition-all duration-300 hover:scale-110 bg-white/80 backdrop-blur-sm rounded-full p-2 shadow-lg"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <form onSubmit={handleSubmit} className="p-8 space-y-6">
+          <div className="fade-in-up">
+            <label className="block text-sm font-bold text-gray-700 mb-3">
               Your Name *
             </label>
             <input
@@ -109,13 +112,13 @@ export function AppointmentModal({ isOpen, onClose, selectedDoctorId }: Appointm
               required
               value={formData.patient_name}
               onChange={(e) => setFormData({ ...formData, patient_name: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 hover:border-gray-300"
               placeholder="John Doe"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <div className="fade-in-up" style={{ animationDelay: '0.1s' }}>
+            <label className="block text-sm font-bold text-gray-700 mb-3">
               Email *
             </label>
             <input
@@ -123,13 +126,13 @@ export function AppointmentModal({ isOpen, onClose, selectedDoctorId }: Appointm
               required
               value={formData.patient_email}
               onChange={(e) => setFormData({ ...formData, patient_email: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 hover:border-gray-300"
               placeholder="john@example.com"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <div className="fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <label className="block text-sm font-bold text-gray-700 mb-3">
               Phone *
             </label>
             <input
@@ -137,19 +140,19 @@ export function AppointmentModal({ isOpen, onClose, selectedDoctorId }: Appointm
               required
               value={formData.patient_phone}
               onChange={(e) => setFormData({ ...formData, patient_phone: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 hover:border-gray-300"
               placeholder="(555) 123-4567"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <div className="fade-in-up" style={{ animationDelay: '0.3s' }}>
+            <label className="block text-sm font-bold text-gray-700 mb-3">
               Select Doctor
             </label>
             <select
               value={formData.doctor_id}
               onChange={(e) => setFormData({ ...formData, doctor_id: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 hover:border-gray-300"
             >
               <option value="">Any Available Doctor</option>
               {doctors.map((doctor) => (
@@ -160,14 +163,14 @@ export function AppointmentModal({ isOpen, onClose, selectedDoctorId }: Appointm
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <div className="fade-in-up" style={{ animationDelay: '0.4s' }}>
+            <label className="block text-sm font-bold text-gray-700 mb-3">
               Select Service
             </label>
             <select
               value={formData.service_id}
               onChange={(e) => setFormData({ ...formData, service_id: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 hover:border-gray-300"
             >
               <option value="">General Consultation</option>
               {services.map((service) => (
@@ -178,9 +181,9 @@ export function AppointmentModal({ isOpen, onClose, selectedDoctorId }: Appointm
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-6 fade-in-up" style={{ animationDelay: '0.5s' }}>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-bold text-gray-700 mb-3">
                 Preferred Date *
               </label>
               <input
@@ -189,63 +192,80 @@ export function AppointmentModal({ isOpen, onClose, selectedDoctorId }: Appointm
                 value={formData.preferred_date}
                 onChange={(e) => setFormData({ ...formData, preferred_date: e.target.value })}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 hover:border-gray-300"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-bold text-gray-700 mb-3">
                 Preferred Time *
               </label>
               <select
                 required
                 value={formData.preferred_time}
                 onChange={(e) => setFormData({ ...formData, preferred_time: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 hover:border-gray-300"
               >
                 <option value="">Select time</option>
-                <option value="09:00 AM">09:00 AM</option>
-                <option value="10:00 AM">10:00 AM</option>
-                <option value="11:00 AM">11:00 AM</option>
-                <option value="01:00 PM">01:00 PM</option>
-                <option value="02:00 PM">02:00 PM</option>
-                <option value="03:00 PM">03:00 PM</option>
-                <option value="04:00 PM">04:00 PM</option>
+                <option value="09:00">09:00</option>
+                <option value="10:00">10:00</option>
+                <option value="11:00">11:00</option>
+                <option value="13:00">13:00</option>
+                <option value="14:00">14:00</option>
+                <option value="15:00">15:00</option>
+                <option value="16:00">16:00</option>
               </select>
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <div className="fade-in-up" style={{ animationDelay: '0.6s' }}>
+            <label className="block text-sm font-bold text-gray-700 mb-3">
               Additional Notes
             </label>
             <textarea
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={4}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 hover:border-gray-300"
               placeholder="Any specific concerns or requirements..."
             />
           </div>
 
           {submitStatus === 'success' && (
-            <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
-              Appointment request submitted successfully! We'll contact you soon.
+            <div className="bg-green-50 border-2 border-green-200 text-green-800 px-6 py-4 rounded-xl fade-in-up">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm">✓</span>
+                </div>
+                <span className="font-semibold">Appointment request submitted successfully! We'll contact you soon.</span>
+              </div>
             </div>
           )}
 
           {submitStatus === 'error' && (
-            <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
-              Failed to submit appointment. Please try again.
+            <div className="bg-red-50 border-2 border-red-200 text-red-800 px-6 py-4 rounded-xl fade-in-up">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm">✗</span>
+                </div>
+                <span className="font-semibold">Failed to submit appointment. Please try again.</span>
+              </div>
             </div>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-gray-400 text-white py-3 rounded-lg font-semibold transition-colors"
+            className="w-full bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-600 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 text-white py-4 rounded-xl font-bold transition-all duration-500 shadow-lg hover:shadow-xl hover:scale-105 glow-effect disabled:hover:scale-100"
           >
-            {loading ? 'Submitting...' : 'Submit Appointment Request'}
+            {loading ? (
+              <div className="flex items-center justify-center gap-3">
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span>Submitting request...</span>
+              </div>
+            ) : (
+              'Submit Appointment Request'
+            )}
           </button>
         </form>
       </div>

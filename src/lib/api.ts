@@ -55,6 +55,7 @@ export interface Doctor {
   full_name: string;
   title: string;
   specialty_id: number;
+  specialty_name?: string;
   bio: string;
   education: string;
   experience_years: number;
