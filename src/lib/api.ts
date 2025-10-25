@@ -1,37 +1,54 @@
-// API client for Neon PostgreSQL via Proxy Server
-import { databaseClient } from './database';
-
+// src/lib/api.ts
 class ApiClient {
-  constructor() {
-    console.log('🔍 API Client initializing...');
-    console.log('✅ API Client initialized successfully');
+  baseUrl: string;
+
+  constructor(baseUrl: string = 'http://localhost:3001') {
+    this.baseUrl = baseUrl;
   }
 
-  // Doctors API
-  async getDoctors() {
-    return databaseClient.getDoctors();
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      headers: { 'Content-Type': 'application/json', ...options.headers },
+      ...options,
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Request failed: ${response.status} ${text}`);
+    }
+
+    return response.json();
   }
 
-  // Services API
-  async getServices() {
-    return databaseClient.getServices();
+  // --- API endpoints ---
+  getDoctors() {
+    return this.request('/doctors');
   }
 
-  // Testimonials API
-  async getTestimonials(limit?: number) {
-    return databaseClient.getTestimonials(limit);
+  getServices() {
+    return this.request('/services');
   }
 
-  // Appointments API
-  async createAppointment(appointment: any) {
-    return databaseClient.createAppointment(appointment);
+  getTestimonials() {
+    return this.request('/testimonials');
+  }
+
+  getAppointments() {
+    return this.request('/appointments');
+  }
+
+  createAppointment(appointment: any) {
+    return this.request('/appointments', {
+      method: 'POST',
+      body: JSON.stringify(appointment),
+    });
   }
 }
 
-// Create and export the API client instance
+// Экспортируем экземпляр
 export const apiClient = new ApiClient();
 
-// Export types for TypeScript
+// --- типы ---
 export interface Doctor {
   id: number;
   full_name: string;
@@ -67,18 +84,4 @@ export interface Testimonial {
   doctor_id: number;
   is_approved: boolean;
   created_at: string;
-}
-
-export interface Appointment {
-  id?: number;
-  patient_name: string;
-  patient_email: string;
-  patient_phone: string;
-  doctor_id: number;
-  service_id: number;
-  preferred_date: string;
-  preferred_time: string;
-  notes: string;
-  status: string;
-  created_at?: string;
 }

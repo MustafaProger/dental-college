@@ -1,180 +1,107 @@
-// Simple Node.js server to proxy Neon requests
-// Run with: node server.js
+// Dental College Backend Server (ESM)
+import http from 'node:http';
+import { neon } from '@neondatabase/serverless';
+import dotenv from 'dotenv';
 
-const http = require('http');
-const https = require('https');
-const url = require('url');
+dotenv.config();
 
-const PORT = 3001;
+if (!process.env.DATABASE_URL) {
+  console.error('❌ DATABASE_URL not set in .env');
+  process.exit(1);
+}
 
-// CORS headers
-const corsHeaders = {
+const sql = neon(process.env.DATABASE_URL);
+const PORT = process.env.PORT || 3001;
+
+// CORS
+const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-const server = http.createServer((req, res) => {
-  // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    res.writeHead(200, corsHeaders);
-    res.end();
-    return;
-  }
+const send = (res, code, data) => {
+  res.writeHead(code, { 'Content-Type': 'application/json', ...CORS });
+  res.end(JSON.stringify(data));
+};
 
-  // Set CORS headers
-  Object.keys(corsHeaders).forEach(key => {
-    res.setHeader(key, corsHeaders[key]);
-  });
+const server = http.createServer(async (req, res) => {
+  if (req.method === 'OPTIONS') return send(res, 200, { ok: true });
 
-  // Parse URL
-  const parsedUrl = url.parse(req.url, true);
-  const path = parsedUrl.pathname;
+  const { pathname } = new URL(req.url, 'http://localhost');
+  // поддержка /api-префикса и хвостовых слэшей
+  const path = (pathname.replace(/\/+$/, '') || '/').replace(/^\/api(?=\/|$)/, '');
+  console.log(`${req.method} ${path}`);
 
-  // Route requests
-  if (path === '/doctors') {
-    handleDoctorsRequest(req, res);
-  } else if (path === '/services') {
-    handleServicesRequest(req, res);
-  } else if (path === '/testimonials') {
-    handleTestimonialsRequest(req, res);
-  } else if (path === '/appointments') {
-    handleAppointmentsRequest(req, res);
-  } else {
-    res.writeHead(404, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Not found' }));
+  try {
+    // --- health ---
+    if (req.method === 'GET' && path === '/health') {
+      return send(res, 200, { ok: true });
+    }
+
+    // --- debug counts ---
+    if (req.method === 'GET' && path === '/_debug/counts') {
+      const rows = await sql`
+        SELECT 'doctors' AS table, COUNT(*)::int AS count FROM doctors
+        UNION ALL SELECT 'services', COUNT(*)::int FROM services
+        UNION ALL SELECT 'testimonials', COUNT(*)::int FROM testimonials
+        UNION ALL SELECT 'appointments', COUNT(*)::int FROM appointments
+      `;
+      return send(res, 200, rows);
+    }
+
+    // --- business routes ---
+    if (req.method === 'GET' && path === '/doctors') {
+      const rows = await sql`SELECT * FROM doctors WHERE is_active = true`;
+      return send(res, 200, rows);
+    }
+
+    if (req.method === 'GET' && path === '/services') {
+      const rows = await sql`SELECT * FROM services WHERE is_active = true`;
+      return send(res, 200, rows);
+    }
+
+    if (req.method === 'GET' && path === '/testimonials') {
+      const rows = await sql`
+        SELECT * FROM testimonials
+        WHERE is_approved = true
+        ORDER BY created_at DESC
+        LIMIT 6
+      `;
+      return send(res, 200, rows);
+    }
+
+    if (path === '/appointments' && req.method === 'GET') {
+      const rows = await sql`SELECT * FROM appointments ORDER BY created_at DESC`;
+      return send(res, 200, rows);
+    }
+
+    if (path === '/appointments' && req.method === 'POST') {
+      let body = '';
+      for await (const chunk of req) body += chunk;
+      const a = JSON.parse(body);
+
+      const rows = await sql`
+        INSERT INTO appointments
+          (patient_name, patient_email, patient_phone, doctor_id, service_id,
+           preferred_date, preferred_time, notes, status)
+        VALUES
+          (${a.patient_name}, ${a.patient_email}, ${a.patient_phone},
+           ${a.doctor_id}, ${a.service_id},
+           ${a.preferred_date}, ${a.preferred_time},
+           ${a.notes}, 'pending')
+        RETURNING *
+      `;
+      return send(res, 200, rows[0] ?? {});
+    }
+
+    return send(res, 404, { error: 'Not found', path });
+  } catch (e) {
+    console.error('❌ Error:', e);
+    return send(res, 500, { error: e.message });
   }
 });
 
-// Neon configuration
-const NEON_PROJECT_ID = 'steep-meadow-a4i1lp38';
-const NEON_API_KEY = 'napi_i45xay6hzrxii1fthgb87h1pwezt1284uua0c7ncloc7da7nko006xtbxg13mwpj';
-
-function makeNeonRequest(query, callback) {
-  const postData = JSON.stringify({ query });
-  
-  const options = {
-    hostname: 'console.neon.tech',
-    port: 443,
-    path: `/api/v2/projects/${NEON_PROJECT_ID}/sql`,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${NEON_API_KEY}`,
-      'Content-Length': Buffer.byteLength(postData)
-    }
-  };
-
-  const req = https.request(options, (res) => {
-    let data = '';
-    
-    res.on('data', (chunk) => {
-      data += chunk;
-    });
-    
-    res.on('end', () => {
-      try {
-        const result = JSON.parse(data);
-        callback(null, result);
-      } catch (error) {
-        callback(error, null);
-      }
-    });
-  });
-
-  req.on('error', (error) => {
-    callback(error, null);
-  });
-
-  req.write(postData);
-  req.end();
-}
-
-function handleDoctorsRequest(req, res) {
-  const query = "SELECT * FROM doctors WHERE is_active = true";
-  
-  makeNeonRequest(query, (error, result) => {
-    if (error) {
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: error.message }));
-    } else {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(result.rows || []));
-    }
-  });
-}
-
-function handleServicesRequest(req, res) {
-  const query = "SELECT * FROM services WHERE is_active = true";
-  
-  makeNeonRequest(query, (error, result) => {
-    if (error) {
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: error.message }));
-    } else {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(result.rows || []));
-    }
-  });
-}
-
-function handleTestimonialsRequest(req, res) {
-  const query = "SELECT * FROM testimonials WHERE is_approved = true ORDER BY created_at DESC LIMIT 6";
-  
-  makeNeonRequest(query, (error, result) => {
-    if (error) {
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: error.message }));
-    } else {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(result.rows || []));
-    }
-  });
-}
-
-function handleAppointmentsRequest(req, res) {
-  if (req.method === 'POST') {
-    let body = '';
-    req.on('data', chunk => {
-      body += chunk.toString();
-    });
-    
-    req.on('end', () => {
-      try {
-        const appointment = JSON.parse(body);
-        const query = `INSERT INTO appointments (patient_name, patient_email, patient_phone, doctor_id, service_id, preferred_date, preferred_time, notes, status) VALUES ('${appointment.patient_name}', '${appointment.patient_email}', '${appointment.patient_phone}', ${appointment.doctor_id}, ${appointment.service_id}, '${appointment.preferred_date}', '${appointment.preferred_time}', '${appointment.notes}', 'pending') RETURNING *`;
-        
-        makeNeonRequest(query, (error, result) => {
-          if (error) {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: error.message }));
-          } else {
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(result.rows[0] || {}));
-          }
-        });
-      } catch (error) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Invalid JSON' }));
-      }
-    });
-  } else {
-    const query = "SELECT * FROM appointments ORDER BY created_at DESC";
-    
-    makeNeonRequest(query, (error, result) => {
-      if (error) {
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: error.message }));
-      } else {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(result.rows || []));
-      }
-    });
-  }
-}
-
 server.listen(PORT, () => {
-  console.log(`🚀 Proxy server running on http://localhost:${PORT}`);
-  console.log(`📊 Connecting to Neon PostgreSQL`);
-  console.log(`🔗 Project ID: ${NEON_PROJECT_ID}`);
+  console.log(`✅ Server running on http://localhost:${PORT}`);
 });
