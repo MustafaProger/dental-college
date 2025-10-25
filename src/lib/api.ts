@@ -21,17 +21,17 @@ class ApiClient {
   }
 
   // --- API endpoints ---
-  getDoctors() {
-    return this.request('/doctors');
+  getDoctors(): Promise<Doctor[]> {
+    return this.request<Doctor[]>('/doctors');
   }
 
-  getServices() {
-    return this.request('/services');
+  getServices(): Promise<Service[]> {
+    return this.request<Service[]>('/services');
   }
 
-  getTestimonials(limit?: number) {
+  getTestimonials(limit?: number): Promise<Testimonial[]> {
     const endpoint = limit ? `/testimonials?limit=${limit}` : '/testimonials';
-    return this.request(endpoint);
+    return this.request<Testimonial[]>(endpoint);
   }
 
   getAppointments() {
@@ -74,6 +74,7 @@ export interface Service {
   duration_minutes: number;
   price_range: string;
   specialty_id: number;
+  specialty_name?: string;
   is_active: boolean;
   created_at: string;
 }
@@ -84,6 +85,7 @@ export interface Testimonial {
   rating: number;
   comment: string;
   doctor_id: number;
+  doctor_name?: string;
   is_approved: boolean;
   created_at: string;
 }
