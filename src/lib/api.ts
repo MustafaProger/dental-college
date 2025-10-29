@@ -38,7 +38,7 @@ class ApiClient {
     return this.request('/appointments');
   }
 
-  createAppointment(appointment: any) {
+  createAppointment(appointment: CreateAppointmentDTO) {
     return this.request('/appointments', {
       method: 'POST',
       body: JSON.stringify(appointment),
@@ -88,4 +88,16 @@ export interface Testimonial {
   doctor_name?: string;
   is_approved: boolean;
   created_at: string;
+}
+
+export interface CreateAppointmentDTO {
+  patient_name: string;
+  patient_email: string;
+  patient_phone: string;
+  doctor_id: number | null;
+  service_id: number | null;
+  preferred_date: string; // YYYY-MM-DD
+  preferred_time: string; // HH:mm
+  notes?: string;
+  status?: 'pending' | 'confirmed' | 'cancelled';
 }
